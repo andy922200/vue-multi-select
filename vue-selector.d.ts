@@ -2,8 +2,13 @@ import Vue, {
     PluginFunction, VueConstructor 
 } from 'vue'
 
+import {
+    VueSelectorModule
+} from './vue-selector-module'
 
-declare const VueSelector: PluginFunction<any>
-export default VueSelector
+export { VueSelectorModule }
 
-export const VueSelectorSample: VueConstructor<Vue>
+declare const VueSelectorInstall: PluginFunction<any>
+export default VueSelectorInstall
+
+export const VueSelector: VueConstructor<Vue>
