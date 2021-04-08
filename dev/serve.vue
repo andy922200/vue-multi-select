@@ -1,8 +1,29 @@
 <script lang="ts">
 import Vue from 'vue'
+import axios from 'axios'
 
 export default Vue.extend({
-    name: 'ServeDev'
+    name: 'ServeDev',
+    data(){
+        return {
+            jobData: []
+        }
+    },
+    async created(){
+        try{
+            const { data: rawData } = await axios.get('/positions.json?search=nodejs')
+            const result = rawData.map((d:any)=>{
+                const newObject = {
+                    ... d 
+                }
+                newObject.label = d.title
+                return newObject
+            })
+            this.$data.jobData.push(... result)
+        }catch(err){
+            console.log(err)
+        }
+    }
 })
 </script>
 
@@ -17,6 +38,7 @@ export default Vue.extend({
                     selectAll: { name: 'SelectAll1', hide: false},
                     clear: { name: 'Clear1', hide: false},
                 }"
+                :options="jobData"
                 place-holder-text="placeHolderText"
             >
                 <template #closeBtn="{closeMethod}">
@@ -25,7 +47,7 @@ export default Vue.extend({
                         class="btn btn-warning btn__warning dropdownBtn__format"
                         @click.stop.self="closeMethod"
                     >
-                        Warning~~
+                        Close
                     </button>
                 </template>
             </vue-selector>

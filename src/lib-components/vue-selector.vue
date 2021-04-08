@@ -3,12 +3,12 @@
         <div
             ref="vueSelector"
             class="dropdown"
-            @click.stop="changeToggleStatus"
+            @click.stop.self="changeToggleStatus"
         >
             <button
                 type="button"
                 class="btn btn-light btn__light dropdown__toggle"
-                @click.stop="changeToggleStatus"
+                @click.stop.self="changeToggleStatus"
             >
                 {{ selectorTitle }}
                 <span class="caret" />
@@ -40,20 +40,28 @@
                             {{ defaultButtonOptions.apply.name }}
                         </button>
                     </slot>
-                    <slot name="selectAllBtn">
+                    <slot 
+                        name="selectAllBtn"
+                        :selectAllMethod="selectAllMethod"
+                    >
                         <button
                             v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide"
                             type="button"
                             class="btn btn-info btn__info dropdownBtn__format"
+                            @click.stop.self="selectAllMethod"
                         >
                             {{ defaultButtonOptions.selectAll.name }}
                         </button>
                     </slot>
-                    <slot name="clearBtn">
+                    <slot 
+                        name="clearBtn"
+                        :clearSelectedOptionsMethod="clearSelectedOptionsMethod"
+                    >
                         <button
                             v-if="defaultButtonOptions.clear && !defaultButtonOptions.clear.hide"
                             type="button"
                             class="btn btn-danger btn__danger dropdownBtn__format"
+                            @click.stop.self="clearSelectedOptionsMethod"
                         >
                             {{ defaultButtonOptions.clear.name }}
                         </button>
@@ -61,26 +69,43 @@
                 </div>
 
                 <br>
-                <input
-                    type="text"
-                    class="searchBar"
-                    :placeholder="placeHolderText"
-                >
-                <div id="linkedAccountDropdown__filterOptionsWrapper">
+
+                <div class="dropdown__searchField">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        class="searchBar"
+                        :placeholder="placeHolderText"
+                    >
+                </div>
+
+                <div id="dropdown__filterOptionsWrapper">
                     <!--Spinner-->
                     <div
-                        id="linkedAccountDropdown__overlay"
-                        class="spinnerOverlay"
+                        class="dropdown__spinnerOverlay"
                     >
                         <div class="cv-spinner">
                             <span class="spinner" />
                         </div>
                     </div>
                     <!--Options Area-->
-                    <div
-                        id="linkedAccountDropdown__filterOptions"
-                        class="filter-options"
-                    />
+                    <div class="dropdown__optionsArea">
+                        <div 
+                            v-for="(option,index) in filterItems(options)"
+                            :key="`option${index}`"
+                            class="dropdown__optionWrapper"
+                        >
+                            <input 
+                                :id="`option${index}`" 
+                                v-model="selectedOptions" 
+                                type="checkbox" 
+                                :value="option"
+                            >
+                            <label :for="`option${index}`">
+                                {{ option.label }}
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,10 +136,19 @@ export default Vue.extend({
                 return {
                 }
             }
+        },
+        options: {
+            type: Array,
+            required: false,
+            default(){
+                return []
+            }
         }
     },
     data():VueSelectorModule.SelectorData{
         return{
+            searchQuery: '',
+            selectedOptions: [],
             isSelectorOpen: false,
             defaultButtonOptions: {
                 close: {
@@ -136,13 +170,17 @@ export default Vue.extend({
             }
         }
     },
-    created(){
-        if(this.$props.buttonOptions){
-            const keys = Object.keys(this.$props.buttonOptions)
+    async created(){
+        try{
+            if(this.$props.buttonOptions){
+                const keys = Object.keys(this.$props.buttonOptions)
 
-            keys.forEach(key=>{
-                this.$data.defaultButtonOptions[key] = this.$props.buttonOptions[key]
-            })
+                keys.forEach(key=>{
+                    this.$data.defaultButtonOptions[key] = this.$props.buttonOptions[key]
+                })
+            }
+        }catch(err){
+            console.log(err)
         }
     },
     mounted(){
@@ -153,22 +191,45 @@ export default Vue.extend({
     },
     methods: {
         closeMethod(){
+            this.searchQuery = ''
             this.isSelectorOpen = false
+            this.clearSelectedOptionsMethod()
         },
         changeToggleStatus(e: Event){
             const rootInstance = this.$parent
 
             for(let i=0; i<rootInstance.$children.length; i++){
                 if(rootInstance.$children[i].$refs.vueSelector){
+                    rootInstance.$children[i].$data.searchQuery = ''
                     rootInstance.$children[i].$data.isSelectorOpen = false
+                    rootInstance.$children[i].$data.selectedOptions = []
                 }
             }
 
-            e.target instanceof HTMLElement && !this.$el.contains(e.target)
-                ?   this.isSelectorOpen = false
-                :   this.isSelectorOpen = true
+            if(e.target instanceof HTMLElement && !this.$el.contains(e.target)){
+                this.isSelectorOpen = false
+                this.clearSelectedOptionsMethod()
+            }else{
+                this.isSelectorOpen = true
+            } 
+        },
+        filterItems: function(options:any) {
+            const vm = this
+            return options.filter(function(option:any) {
+                let regex = new RegExp('(' + vm.$data.searchQuery + ')', 'i')
+                return option.label
+                    ?   option.label.match(regex)
+                    :   ''
+            })
+        },
+        selectAllMethod(){
+            this.clearSelectedOptionsMethod()
+            this.$data.selectedOptions.push(... this.$props.options)
+        },
+        clearSelectedOptionsMethod(){
+            this.$data.selectedOptions = []
         }
-    }
+    },
 })
 </script>
 
@@ -281,6 +342,33 @@ $colors:(
         height: 300px;
         overflow: auto;
         padding: 10px;
+    }
+
+    .dropdown__searchField{
+        text-align: center;
+        input{
+            padding: 10px 10px 10px 40px;
+            width: calc(100% - 50px);
+            background: url(../images/search_icon.png) no-repeat scroll 7px 7px;
+            &::placeholder{
+                color:#a7a6a6;
+            }
+        }
+    }
+
+    .dropdown__optionsArea{
+        margin:5px 0px;
+    }
+
+    .dropdown__optionWrapper{
+        padding: 5px;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        word-break: break-all;
+        input{
+            margin-right: 8px;
+        }
     }
 }
 </style>
