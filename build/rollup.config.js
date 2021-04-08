@@ -47,17 +47,17 @@ const baseConfig = {
             'process.env.NODE_ENV': JSON.stringify('production'),
         },
         vue: {
-            css: true,
+            css: false,
             template: {
-                isProduction: true,
-            },
+                isProduction: true
+            }
         },
         postVue: [
             rollupPluginScss({
                 processor: css => postCSS([autoprefixer])
                     .process(css)
                     .then(result => result.css),
-                output: 'dist/vue-tw-zip-code-selector.css',
+                output: 'dist/vue-selector.css'
             })
         ],
         babel: {

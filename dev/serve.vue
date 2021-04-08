@@ -8,7 +8,7 @@ export default Vue.extend({
 
 <template>
     <div id="app">
-        <div style="display:flex; justify-content:center;">
+        <div style="display:flex; justify-content:center;width:100%;">
             <vue-selector 
                 selector-title="Test" 
                 :button-options="{
@@ -18,7 +18,17 @@ export default Vue.extend({
                     clear: { name: 'Clear1', hide: false},
                 }"
                 place-holder-text="placeHolderText"
-            />
+            >
+                <template #closeBtn="{closeMethod}">
+                    <button
+                        type="button"
+                        class="btn btn-warning btn__warning dropdownBtn__format"
+                        @click.stop.self="closeMethod"
+                    >
+                        Warning~~
+                    </button>
+                </template>
+            </vue-selector>
             <vue-selector 
                 selector-title="Test2"
                 place-holder-text="placeHolderText2"
