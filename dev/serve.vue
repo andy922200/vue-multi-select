@@ -6,11 +6,24 @@ export default Vue.extend({
     name: 'ServeDev',
     data(){
         return {
-            jobData: []
+            jobData: [],
+            isFetching: false,
+            tests: [
+                {
+                    label: 'LabelA'
+                },
+                {
+                    label: 'LabelB'
+                },
+                {
+                    label: 'LabelC'
+                }
+            ]
         }
     },
-    async created(){
+    async mounted(){
         try{
+            this.$data.isFetching = true
             const { data: rawData } = await axios.get('/positions.json?search=nodejs')
             const result = rawData.map((d:any)=>{
                 const newObject = {
@@ -20,8 +33,14 @@ export default Vue.extend({
                 return newObject
             })
             this.$data.jobData.push(... result)
+            this.$data.isFetching = false
         }catch(err){
             console.log(err)
+        }
+    },
+    methods: {
+        printValue(val:any){
+            console.log('from inside', val)
         }
     }
 })
@@ -31,7 +50,9 @@ export default Vue.extend({
     <div id="app">
         <div style="display:flex; justify-content:center;width:100%;">
             <vue-selector 
-                selector-title="Test" 
+                ref="Test" 
+                selector-title="Test"
+                :is-fetching="isFetching"
                 :button-options="{
                     close: { name: 'Close1', hide: false},
                     apply: { name: 'Apply1', hide: false},
@@ -40,17 +61,8 @@ export default Vue.extend({
                 }"
                 :options="jobData"
                 place-holder-text="placeHolderText"
-            >
-                <template #closeBtn="{closeMethod}">
-                    <button
-                        type="button"
-                        class="btn btn-warning btn__warning dropdownBtn__format"
-                        @click.stop.self="closeMethod"
-                    >
-                        Close
-                    </button>
-                </template>
-            </vue-selector>
+                @getSelectedOptions="printValue"
+            />
             <vue-selector 
                 selector-title="Test2"
                 place-holder-text="placeHolderText2"

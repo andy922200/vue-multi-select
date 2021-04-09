@@ -26,18 +26,22 @@
                             v-if="defaultButtonOptions.close && !defaultButtonOptions.close.hide"
                             type="button"
                             class="btn btn-secondary btn__secondary dropdownBtn__format"
-                            @click.stop.self="closeMethod"
+                            @click.stop="closeMethod"
                         >
-                            {{ defaultButtonOptions.close.name }}
+                            <span>{{ defaultButtonOptions.close.name }}</span>
                         </button>
                     </slot>
-                    <slot name="applyBtn">
+                    <slot 
+                        name="applyBtn"
+                        :applyMethod="applyMethod"
+                    >
                         <button
                             v-if="defaultButtonOptions.apply && !defaultButtonOptions.apply.hide"
                             type="button"
                             class="btn btn-primary btn__primary dropdownBtn__format"
+                            @click.stop="applyMethod"
                         >
-                            {{ defaultButtonOptions.apply.name }}
+                            <span>{{ defaultButtonOptions.apply.name }}</span>
                         </button>
                     </slot>
                     <slot 
@@ -48,9 +52,9 @@
                             v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide"
                             type="button"
                             class="btn btn-info btn__info dropdownBtn__format"
-                            @click.stop.self="selectAllMethod"
+                            @click.stop="selectAllMethod"
                         >
-                            {{ defaultButtonOptions.selectAll.name }}
+                            <span>{{ defaultButtonOptions.selectAll.name }}</span>
                         </button>
                     </slot>
                     <slot 
@@ -61,9 +65,9 @@
                             v-if="defaultButtonOptions.clear && !defaultButtonOptions.clear.hide"
                             type="button"
                             class="btn btn-danger btn__danger dropdownBtn__format"
-                            @click.stop.self="clearSelectedOptionsMethod"
+                            @click.stop="clearSelectedOptionsMethod"
                         >
-                            {{ defaultButtonOptions.clear.name }}
+                            <span>{{ defaultButtonOptions.clear.name }}</span>
                         </button>
                     </slot>
                 </div>
@@ -81,13 +85,16 @@
 
                 <div id="dropdown__filterOptionsWrapper">
                     <!--Spinner-->
-                    <div
-                        class="dropdown__spinnerOverlay"
-                    >
-                        <div class="cv-spinner">
-                            <span class="spinner" />
+                    <slot name="spinner">
+                        <div
+                            v-if="isFetching"
+                            class="dropdown__spinnerOverlay"
+                        >
+                            <div class="cv-spinner">
+                                <span class="spinner" />
+                            </div>
                         </div>
-                    </div>
+                    </slot>
                     <!--Options Area-->
                     <div class="dropdown__optionsArea">
                         <div 
@@ -121,6 +128,11 @@ import {
 export default Vue.extend({
     name: 'VueSelector',
     props: {
+        isFetching: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
         selectorTitle: {
             type: String,
             required: true
@@ -149,6 +161,7 @@ export default Vue.extend({
         return{
             searchQuery: '',
             selectedOptions: [],
+            previousSavedOptions: [],
             isSelectorOpen: false,
             defaultButtonOptions: {
                 close: {
@@ -202,7 +215,7 @@ export default Vue.extend({
                 if(rootInstance.$children[i].$refs.vueSelector){
                     rootInstance.$children[i].$data.searchQuery = ''
                     rootInstance.$children[i].$data.isSelectorOpen = false
-                    rootInstance.$children[i].$data.selectedOptions = []
+                    rootInstance.$children[i].$data.selectedOptions = [ ... this.$data.previousSavedOptions]
                 }
             }
 
@@ -213,6 +226,9 @@ export default Vue.extend({
                 this.isSelectorOpen = true
             } 
         },
+        changeSpinnerStatus(status: boolean){
+            this.$data.isFetching = status
+        },
         filterItems: function(options:any) {
             const vm = this
             return options.filter(function(option:any) {
@@ -221,6 +237,11 @@ export default Vue.extend({
                     ?   option.label.match(regex)
                     :   ''
             })
+        },
+        applyMethod(){
+            this.$data.previousSavedOptions = this.$data.selectedOptions
+            this.$emit('getSelectedOptions', this.$data.previousSavedOptions)
+            this.isSelectorOpen = false
         },
         selectAllMethod(){
             this.clearSelectedOptionsMethod()
@@ -256,42 +277,42 @@ $colors:(
     dark:#343a40
 );
 
-.btn{
-    display:inline-block;
-    padding:0.3em 1.2em;
-    margin:0 0.1em 0.1em 0;
-    border:0.16em solid rgba(255,255,255,0);
-    border-radius:2em;
-    box-sizing: border-box;
-    text-decoration:none;
-    color:#FFFFFF;
-    text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-    text-align:center;
-    transition: all 0.2s;
-    &:hover{
-        border-color:#a7a6a6;
-    }
-    &:focus{
-        outline: unset;
-    }
-}
-
-@each $type in $typeList{
-    @if ($type == 'light'){
-        .btn__#{$type}{
-            background-color: map-get($colors, $type);
-            color:#000000;
-        }
-    }@else{
-        .btn__#{$type}{
-            background-color: map-get($colors, $type);
-        }
-    }
-}
-
 .dropdown__wrapper{
     position: relative;
     display: inline-block;
+
+    .btn{
+        display:inline-block;
+        padding:0.3em 1.2em;
+        margin:0 0.1em 0.1em 0;
+        border:0.16em solid rgba(255,255,255,0);
+        border-radius:2em;
+        box-sizing: border-box;
+        text-decoration:none;
+        color:#FFFFFF;
+        text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
+        text-align:center;
+        transition: all 0.2s;
+        &:hover{
+            border-color:#a7a6a6;
+        }
+        &:focus{
+            outline: unset;
+        }
+    }
+
+    @each $type in $typeList{
+        @if ($type == 'light'){
+            .btn__#{$type}{
+                background-color: map-get($colors, $type);
+                color:#000000;
+            }
+        }@else{
+            .btn__#{$type}{
+                background-color: map-get($colors, $type);
+            }
+        }
+    }
 
     .dropdown__buttonsArea{
         display:flex; 
@@ -299,7 +320,7 @@ $colors:(
     }
 
     .dropdownBtn__format{
-        margin:0.04rem;
+        margin:0.025rem;
     }
 
     .dropdown__toggle{
@@ -352,6 +373,30 @@ $colors:(
             background: url(../images/search_icon.png) no-repeat scroll 7px 7px;
             &::placeholder{
                 color:#a7a6a6;
+            }
+        }
+    }
+
+    .dropdown__spinnerOverlay{
+        margin-top: 10px;
+        position:relative;
+        .cv-spinner {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;  
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px #ddd solid;
+            border-top: 4px #2e93e6 solid;
+            border-radius: 50%;
+            animation: sp-anime 0.8s infinite linear;
+        }
+        @keyframes sp-anime {
+            100% { 
+                transform: rotate(360deg); 
             }
         }
     }

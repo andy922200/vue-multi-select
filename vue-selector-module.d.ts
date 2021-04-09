@@ -11,6 +11,7 @@ export namespace VueSelectorModule {
     export interface SelectorData{
         searchQuery: string
         selectedOptions: Array<any>
+        previousSavedOptions: Array<any>
         isSelectorOpen: boolean
         defaultButtonOptions: buttonOptions
     }
