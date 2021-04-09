@@ -49,7 +49,7 @@
                         :selectAllMethod="selectAllMethod"
                     >
                         <button
-                            v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide"
+                            v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide && !single && (limit === Infinity)"
                             type="button"
                             class="btn btn-info btn__info dropdownBtn__format"
                             @click.stop="selectAllMethod"
@@ -107,6 +107,9 @@
                                 v-model="selectedOptions" 
                                 type="checkbox" 
                                 :value="option"
+                                :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                    (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                "
                             >
                             <label :for="`option${index}`">
                                 {{ option.label }}
@@ -128,6 +131,16 @@ import {
 export default Vue.extend({
     name: 'VueSelector',
     props: {
+        single: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        limit: {
+            type: Number,
+            required: false,
+            default: Infinity
+        },
         isFetching: {
             type: Boolean,
             required: false,
