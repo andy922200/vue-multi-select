@@ -78,7 +78,7 @@
                     <input
                         v-model="searchQuery"
                         type="text"
-                        class="searchBar"
+                        class="dropdown__searchBar dropdown__searchBarFormat"
                         :placeholder="placeHolderText"
                     >
                 </div>
@@ -125,8 +125,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import {
-    VueSelectorModule 
-} from '../../vue-selector'
+    VueMultiSelectModule 
+} from '../../vue-multi-select'
 
 export default Vue.extend({
     name: 'VueSelector',
@@ -170,7 +170,7 @@ export default Vue.extend({
             }
         }
     },
-    data():VueSelectorModule.SelectorData{
+    data():VueMultiSelectModule.SelectorData{
         return{
             searchQuery: '',
             selectedOptions: [],
@@ -268,6 +268,8 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
+$rootFontSize: 13.3333333px;
+
 $typeList: (
     'primary',
     'secondary',
@@ -296,14 +298,14 @@ $colors:(
 
     .btn{
         display:inline-block;
-        padding:0.3em 1.2em;
-        margin:0 0.1em 0.1em 0;
-        border:0.16em solid rgba(255,255,255,0);
-        border-radius:2em;
+        padding:0.3*$rootFontSize 1.2*$rootFontSize;
+        margin:0 0.1*$rootFontSize 0.1*$rootFontSize 0;
+        border:0.16*$rootFontSize solid rgba(255,255,255,0);
+        border-radius:2*$rootFontSize;
         box-sizing: border-box;
         text-decoration:none;
         color:#FFFFFF;
-        text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
+        text-shadow: 0 0.04*$rootFontSize 0.04*$rootFontSize rgba(0,0,0,0.35);
         text-align:center;
         transition: all 0.2s;
         &:hover{
@@ -333,20 +335,20 @@ $colors:(
     }
 
     .dropdownBtn__format{
-        margin:0.025rem;
+        margin:0.005 * $rootFontSize;
     }
 
     .dropdown__toggle{
         white-space: nowrap;
         &:after{
             display: inline-block;
-            margin-left: .255em;
-            vertical-align: .255em;
+            margin-left: .255 * $rootFontSize;
+            vertical-align: .255 * $rootFontSize;
             content: "";
-            border-top: .3em solid;
-            border-right: .3em solid transparent;
+            border-top: .3 * $rootFontSize solid;
+            border-right: .3 * $rootFontSize solid transparent;
             border-bottom: 0;
-            border-left: .3em solid transparent;
+            border-left: .3 * $rootFontSize solid transparent;
         }
     }
 
@@ -356,17 +358,17 @@ $colors:(
         left: 0;
         z-index: 1000;
         float: left;
-        min-width: 10rem;
-        padding: .5rem 0;
-        margin: .125rem 0 0;
-        font-size: 1rem;
+        min-width: 10 * $rootFontSize;
+        padding: .5 * $rootFontSize 0;
+        margin: .125 * $rootFontSize 0 0;
+        font-size: 1 * $rootFontSize;
         color: #212529;
         text-align: left;
         list-style: none;
         background-color: #fff;
         background-clip: padding-box;
         border: 1px solid rgba(0,0,0,.15);
-        border-radius: .25rem;
+        border-radius: .25 * $rootFontSize;
         display: unset;
     }
 
@@ -380,12 +382,36 @@ $colors:(
 
     .dropdown__searchField{
         text-align: center;
-        input{
+        .dropdown__searchBar{
             padding: 10px 10px 10px 40px;
             width: calc(100% - 50px);
             background: url(../images/search_icon.png) no-repeat scroll 7px 7px;
             &::placeholder{
                 color:#a7a6a6;
+            }
+        }
+
+        .dropdown__searchBarFormat{
+            text-rendering: auto;
+            color: #000000;
+            letter-spacing: normal;
+            word-spacing: normal;
+            text-transform: none;
+            text-indent: 0px;
+            text-shadow: none;
+            display: inline-block;
+            text-align: start;
+            appearance: auto;
+            cursor: text;
+            margin: 0;
+            font: 400 $rootFontSize Arial;
+            border-width: 2px;
+            border-style: inset;
+            border-image: initial;
+            border-color:#000000;
+            border-radius:2 * $rootFontSize;
+            &:focus{
+                outline:unset;
             }
         }
     }
@@ -424,6 +450,8 @@ $colors:(
         flex-wrap: nowrap;
         align-items: center;
         word-break: break-all;
+        font-weight: 500;
+        font-size: $rootFontSize*1.2;
         input{
             margin-right: 8px;
         }

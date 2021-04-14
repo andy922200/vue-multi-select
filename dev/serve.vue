@@ -49,7 +49,7 @@ export default Vue.extend({
 <template>
     <div id="app">
         <div style="display:flex; justify-content:center;width:100%;">
-            <vue-selector 
+            <vue-multi-select 
                 ref="Test" 
                 selector-title="Test"
                 :is-fetching="isFetching"
@@ -63,11 +63,11 @@ export default Vue.extend({
                 place-holder-text="placeHolderText"
                 @getSelectedOptions="printValue"
             />
-            <vue-selector 
+            <vue-multi-select
                 selector-title="Test2"
                 place-holder-text="placeHolderText2"
             />
-            <vue-selector 
+            <vue-multi-select
                 selector-title="Test3"
                 place-holder-text="placeHolderText3"
             />

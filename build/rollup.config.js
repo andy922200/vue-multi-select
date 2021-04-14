@@ -16,6 +16,7 @@ import minimist from 'minimist'
 import autoprefixer from 'autoprefixer'
 import postCSS from 'postcss'
 import rollupPluginScss from 'rollup-plugin-scss'
+import postCSSUrl from 'postcss-url'
 
 // Get browserslist config and remove ie from es build targets
 const esbrowserslist = fs.readFileSync('./.browserslistrc')
@@ -55,9 +56,15 @@ const baseConfig = {
         postVue: [
             rollupPluginScss({
                 processor: css => postCSS([autoprefixer])
-                    .process(css)
+                    .use(postCSSUrl({
+                        url: 'inline'
+                    }))
+                    .process(css, {
+                        from: 'src/stylesheet/index.css',
+                        to: 'dist/index.css'
+                    })
                     .then(result => result.css),
-                output: 'dist/vue-selector.css'
+                output: 'dist/vue-multi-select.css'
             })
         ],
         babel: {
@@ -92,7 +99,7 @@ if (!argv.format || argv.format === 'es') {
         input: 'src/entry.esm.ts',
         external,
         output: {
-            file: 'dist/vue-selector.esm.js',
+            file: 'dist/vue-multi-select.esm.js',
             format: 'esm',
             exports: 'named',
         },
@@ -124,7 +131,7 @@ if (!argv.format || argv.format === 'cjs') {
         external,
         output: {
             compact: true,
-            file: 'dist/vue-selector.ssr.js',
+            file: 'dist/vue-multi-select.ssr.js',
             format: 'cjs',
             name: 'VueSelector',
             exports: 'auto',
@@ -154,7 +161,7 @@ if (!argv.format || argv.format === 'iife') {
         external,
         output: {
             compact: true,
-            file: 'dist/vue-selector.min.js',
+            file: 'dist/vue-multi-select.min.js',
             format: 'iife',
             name: 'VueSelector',
             exports: 'auto',

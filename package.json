@@ -1,26 +1,26 @@
 {
-    "name": "@andy922200/vue-selector",
+    "name": "@andy922200/vue-multi-select",
     "version": "1.0.0",
     "description": "A Custom Selector via Vue 2.0 & TypeScript",
     "author": "Andy Lien <andy922200@gmail.com>",
     "repository": {
         "type": "git",
-        "url": "https://github.com/andy922200/vue-selector.git"
+        "url": "https://github.com/andy922200/vue-multi-select.git"
     },
     "keywords": [
         "typescript",
         "vue",
         "selector"
     ],
-    "main": "dist/vue-selector.ssr.js",
-    "browser": "dist/vue-selector.esm.js",
-    "module": "dist/vue-selector.esm.js",
-    "unpkg": "dist/vue-selector.min.js",
-    "types": "vue-selector.d.ts",
+    "main": "dist/vue-multi-select.ssr.js",
+    "browser": "dist/vue-multi-select.esm.js",
+    "module": "dist/vue-multi-select.esm.js",
+    "unpkg": "dist/vue-multi-select.min.js",
+    "types": "vue-multi-select.d.ts",
     "files": [
         "dist/*",
-        "vue-selector.d.ts",
-        "vue-selector-module.d.ts",
+        "vue-multi-select.d.ts",
+        "vue-multi-select-module.d.ts",
         "src/**/*.vue"
     ],
     "sideEffects": false,
@@ -54,6 +54,7 @@
         "eslint-plugin-vue": "^7.8.0",
         "minimist": "^1.2.5",
         "postcss": "^8.2.9",
+        "postcss-url": "^10.1.3",
         "rollup": "^2.36.1",
         "rollup-plugin-scss": "^2.6.1",
         "rollup-plugin-terser": "^7.0.2",

@@ -1,1 +1,1 @@
-export { default as VueSelector } from './vue-selector.vue'
+export { default as VueMultiSelect } from './vue-multi-select.vue'

@@ -1,4 +1,4 @@
-export namespace VueSelectorModule {
+export namespace VueMultiSelectModule {
     interface buttonOption{
         name: string,
         hide: boolean,
