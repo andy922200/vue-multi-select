@@ -148,7 +148,8 @@ export default Vue.extend({
         },
         selectorTitle: {
             type: String,
-            required: true
+            required: true,
+            default: '',
         },
         placeHolderText: {
             type: String,

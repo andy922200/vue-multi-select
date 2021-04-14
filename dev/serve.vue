@@ -50,7 +50,6 @@ export default Vue.extend({
     <div id="app">
         <div style="display:flex; justify-content:center;width:100%;">
             <vue-multi-select 
-                ref="Test" 
                 selector-title="Test"
                 :is-fetching="isFetching"
                 :button-options="{
