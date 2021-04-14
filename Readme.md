@@ -1,7 +1,7 @@
 # Vue-Multi-Select
 
 以 Vue 2 和 TypeScript 為基底的簡易選擇器
-A Vue-Multi-Selector via Vue 2.0 & TypeScript
+A Vue-Multi-Select via Vue 2.0 & TypeScript
 
 ## Table of Contents
   * [Demo](#demo)

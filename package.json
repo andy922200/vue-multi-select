@@ -1,7 +1,7 @@
 {
     "name": "@andy922200/vue-multi-select",
     "version": "1.0.0",
-    "description": "A Custom Selector via Vue 2.0 & TypeScript",
+    "description": "A Custom Select via Vue 2.0 & TypeScript",
     "author": "Andy Lien <andy922200@gmail.com>",
     "repository": {
         "type": "git",
@@ -10,7 +10,8 @@
     "keywords": [
         "typescript",
         "vue",
-        "selector"
+        "multi-select",
+        "component"
     ],
     "main": "dist/vue-multi-select.ssr.js",
     "browser": "dist/vue-multi-select.esm.js",
