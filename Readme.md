@@ -11,7 +11,7 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
   * [License](#license)
 
 ## Demo
-![Alt text](/Demo.gif)
+![Alt text](/demo.gif)
 
 ## Getting Started
 ### Prerequisites 安裝環境建置
