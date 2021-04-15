@@ -6,17 +6,22 @@ export default Vue.extend({
     name: 'ServeDev',
     data(){
         return {
-            jobData: [],
+            jobData: {
+            },
+            singleLayerData: [],
             isFetching: false,
             tests: [
                 {
-                    label: 'LabelA'
+                    label: 'NodeJS',
+                    value: 'nodejs'
                 },
                 {
-                    label: 'LabelB'
+                    label: 'Java',
+                    value: 'java'
                 },
                 {
-                    label: 'LabelC'
+                    label: 'Python',
+                    value: 'python'
                 }
             ]
         }
@@ -24,23 +29,40 @@ export default Vue.extend({
     async mounted(){
         try{
             this.$data.isFetching = true
-            const { data: rawData } = await axios.get('/positions.json?search=nodejs')
-            const result = rawData.map((d:any)=>{
-                const newObject = {
-                    ... d 
-                }
-                newObject.label = d.title
-                return newObject
-            })
-            this.$data.jobData.push(... result)
+            
+            const result = await this.fetchData()
+
+            this.$data.singleLayerData = result
             this.$data.isFetching = false
         }catch(err){
             console.log(err)
         }
     },
     methods: {
-        printValue(val:any){
-            console.log('from inside', val)
+        async fetchData(query='', fatherOptionLabel=''){
+            try{
+                const { data: rawData } = await axios.get(`/positions.json?search=${query}`)
+                const result = rawData.map((d:any)=>{
+                    const newObject = {
+                        ... d,
+                        label: `${fatherOptionLabel} ${d.title}`,
+                        fatherOptionLabel,
+                        groupName: d.company ? d.company : 'N/A'
+                    }
+                    // id key must have
+                    return newObject
+                })
+                return result
+            }catch(err){
+                console.log(err)
+            }
+        },
+        async printValue(obj:any) {
+            try{
+                console.log('from inside', obj)                
+            }catch(err){
+                console.log(err)
+            }
         }
     }
 })
@@ -50,7 +72,7 @@ export default Vue.extend({
     <div id="app">
         <div style="display:flex; justify-content:center;width:100%;">
             <vue-multi-select 
-                selector-title="Test"
+                selector-title="DoubleLayer"
                 :is-fetching="isFetching"
                 :button-options="{
                     close: { name: 'Close1', hide: false},
@@ -58,13 +80,18 @@ export default Vue.extend({
                     selectAll: { name: 'SelectAll1', hide: false},
                     clear: { name: 'Clear1', hide: false},
                 }"
-                :options="jobData"
+                :double-layer-mode="true"
+                :father-options="tests"
+                :children-option-fetch-function="fetchData"
                 place-holder-text="placeHolderText"
                 @getSelectedOptions="printValue"
             />
             <vue-multi-select
-                selector-title="Test2"
+                selector-title="SingleLayer"
+                :is-fetching="isFetching"
+                :options="singleLayerData"
                 place-holder-text="placeHolderText2"
+                @getSelectedOptions="printValue"
             />
             <vue-multi-select
                 selector-title="Test3"

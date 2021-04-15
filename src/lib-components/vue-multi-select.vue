@@ -17,6 +17,7 @@
                 v-if="isSelectorOpen"
                 class="dropdown__menu dropdown__format"
             >
+                <!-- General Part-->
                 <div class="dropdown__buttonsArea">
                     <slot
                         name="closeBtn"
@@ -52,6 +53,7 @@
                             v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide && !single && (limit === Infinity)"
                             type="button"
                             class="btn btn-info btn__info dropdownBtn__format"
+                            :disabled="isFatherLayerOpen && doubleLayerMode"
                             @click.stop="selectAllMethod"
                         >
                             <span>{{ defaultButtonOptions.selectAll.name }}</span>
@@ -65,6 +67,7 @@
                             v-if="defaultButtonOptions.clear && !defaultButtonOptions.clear.hide"
                             type="button"
                             class="btn btn-danger btn__danger dropdownBtn__format"
+                            :disabled="isFatherLayerOpen && doubleLayerMode"
                             @click.stop="clearSelectedOptionsMethod"
                         >
                             <span>{{ defaultButtonOptions.clear.name }}</span>
@@ -74,7 +77,22 @@
 
                 <br>
 
-                <div class="dropdown__searchField">
+                <!-- Double Layer Only-->
+                <template v-if="doubleLayerMode && isFatherLayerOpen">
+                    <a
+                        v-for="(fatherOption,index) in fatherOptions"
+                        :key="`${fatherOption.label},${index}`"
+                        class="dropdown__linkBtn"
+                        @click.stop.self="emitUserSelectedFatherOption(fatherOption)"
+                    >
+                        {{ fatherOption.label }}
+                    </a>
+                </template>
+
+                <div
+                    v-if="!isFatherLayerOpen || !doubleLayerMode"
+                    class="dropdown__searchField"
+                >
                     <input
                         v-model="searchQuery"
                         type="text"
@@ -83,7 +101,7 @@
                     >
                 </div>
 
-                <div id="dropdown__filterOptionsWrapper">
+                <div class="dropdown__filterOptionsWrapper">
                     <!--Spinner-->
                     <slot name="spinner">
                         <div
@@ -95,27 +113,20 @@
                             </div>
                         </div>
                     </slot>
-                    <!--Options Area-->
                     <div class="dropdown__optionsArea">
-                        <template v-if="groupMode">
-                            <div 
-                                v-for="(group, groupIndex) in groupModeOptions.data" 
-                                :key="groupIndex" 
-                                class="dropdown__groupWrapper"
-                            >
-                                <h6
-                                    v-if="filterItems(group).length > 0"
-                                    class="dropdown__groupTitle"
-                                >
-                                    {{ groupModeOptions.list[groupIndex] }}
-                                </h6>
+                        <!--Double Layer Mode Options Area-->
+                        <template v-if="doubleLayerMode && !isFatherLayerOpen">
+                            <button @click.stop.self="goBackToFatherLayer()">
+                                Back
+                            </button>
+                            <template v-if="!groupMode && doubleLayerModeOptions.length !== 0">
                                 <div 
-                                    v-for="(option) in filterItems(group)"
-                                    :key="`option${option.label}`"
+                                    v-for="(option,index) in filterItems(doubleLayerModeOptions)"
+                                    :key="`option${option.fatherOptionLabel}${index}`"
                                     class="dropdown__optionWrapper"
                                 >
                                     <input 
-                                        :id="`option${option.label}`" 
+                                        :id="`option${option.fatherOptionLabel}${index}`" 
                                         v-model="selectedOptions" 
                                         type="checkbox" 
                                         :value="option"
@@ -123,31 +134,108 @@
                                             (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
                                         "
                                     >
-                                    <label :for="`option${option.label}`">
+                                    <label :for="`option${option.fatherOptionLabel}${index}`">
                                         {{ option.label }}
                                     </label>
                                 </div>
-                            </div>
-                        </template>
+                            </template>
 
-                        <template v-else>
-                            <div 
-                                v-for="(option,index) in filterItems(options)"
-                                :key="`option${index}`"
-                                class="dropdown__optionWrapper"
-                            >
-                                <input 
-                                    :id="`option${index}`" 
-                                    v-model="selectedOptions" 
-                                    type="checkbox" 
-                                    :value="option"
-                                    :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
-                                        (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
-                                    "
+                            <template v-if="groupMode && doubleLayerModeOptions.length !== 0">
+                                <div 
+                                    v-for="(fatherLayerItems,index) in doubleLayerGroupModeOptions"
+                                    :key="index"
                                 >
-                                <label :for="`option${index}`">
-                                    {{ option.label }}
-                                </label>
+                                    <template v-if="fatherLayerItems.type === selectedFatherOption">
+                                        <div 
+                                            v-for="(group, groupIndex) in fatherLayerItems.data" 
+                                            :key="groupIndex" 
+                                            class="dropdown__groupWrapper"
+                                        >
+                                            <h6
+                                                v-if="filterItems(group).length > 0"
+                                                class="dropdown__groupTitle"
+                                            >
+                                                {{ fatherLayerItems.list[groupIndex] }}
+                                            </h6>
+                                            <div 
+                                                v-for="(option,subIndex) in filterItems(group)"
+                                                :key="`${option.fatherOptionLabel}${option.id}${subIndex}`"
+                                                class="dropdown__optionWrapper"
+                                            >
+                                                <input 
+                                                    :id="`${option.fatherOptionLabel}${option.id}${subIndex}`" 
+                                                    v-model="selectedOptions" 
+                                                    type="checkbox" 
+                                                    :value="option"
+                                                    :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                                        (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                                    "
+                                                >
+                                                <label :for="`${option.fatherOptionLabel}${option.id}${subIndex}`">
+                                                    {{ option.label }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+                        <!--Single Layer Mode Options Area-->
+                        <template v-if="!doubleLayerMode">
+                            <div class="dropdown__optionsArea">
+                                <template v-if="groupMode">
+                                    <div 
+                                        v-for="(group, groupIndex) in groupModeOptions.data" 
+                                        :key="groupIndex" 
+                                        class="dropdown__groupWrapper"
+                                    >
+                                        <h6
+                                            v-if="filterItems(group).length > 0"
+                                            class="dropdown__groupTitle"
+                                        >
+                                            {{ groupModeOptions.list[groupIndex] }}
+                                        </h6>
+                                        <div 
+                                            v-for="(option) in filterItems(group)"
+                                            :key="`option${option.label}`"
+                                            class="dropdown__optionWrapper"
+                                        >
+                                            <input 
+                                                :id="`option${option.label}`" 
+                                                v-model="selectedOptions" 
+                                                type="checkbox" 
+                                                :value="option"
+                                                :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                                    (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                                "
+                                            >
+                                            <label :for="`option${option.label}`">
+                                                {{ option.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template v-else>
+                                    <div 
+                                        v-for="(option,index) in filterItems(options)"
+                                        :key="`option${index}`"
+                                        class="dropdown__optionWrapper"
+                                    >
+                                        <input 
+                                            :id="`option${index}`" 
+                                            v-model="selectedOptions" 
+                                            type="checkbox" 
+                                            :value="option"
+                                            :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                                (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                            "
+                                        >
+                                        <label :for="`option${index}`">
+                                            {{ option.label }}
+                                        </label>
+                                    </div>
+                                </template>
                             </div>
                         </template>
                     </div>
@@ -198,6 +286,21 @@ export default Vue.extend({
                 }
             }
         },
+        fatherOptions: {
+            type: Array,
+            required: false,
+            default(){
+                return []
+            }
+        },
+        childrenOptionFetchFunction: {
+            type: Function,
+            required: false,
+            default(){
+                return {
+                }
+            }
+        },
         options: {
             type: Array,
             required: false,
@@ -209,6 +312,11 @@ export default Vue.extend({
             type: Boolean,
             default: false,
             required: false
+        },
+        doubleLayerMode: {
+            type: Boolean,
+            default: false,
+            required: false
         }
     },
     data():VueMultiSelectModule.SelectorData{
@@ -216,7 +324,12 @@ export default Vue.extend({
             searchQuery: '',
             selectedOptions: [],
             previousSavedOptions: [],
+            doubleLayerModeOptions: {
+            },
+            doubleLayerGroupModeOptions: [],
+            selectedFatherOption: '',
             isSelectorOpen: false,
+            isFatherLayerOpen: true,
             defaultButtonOptions: {
                 close: {
                     name: 'Close',
@@ -274,7 +387,9 @@ export default Vue.extend({
     methods: {
         closeMethod(){
             this.searchQuery = ''
+            this.selectedFatherOption = ''
             this.isSelectorOpen = false
+            this.isFatherLayerOpen = true
             this.clearSelectedOptionsMethod()
         },
         changeToggleStatus(e: Event){
@@ -283,7 +398,9 @@ export default Vue.extend({
             for(let i=0; i<rootInstance.$children.length; i++){
                 if(rootInstance.$children[i].$refs.vueSelector){
                     rootInstance.$children[i].$data.searchQuery = ''
+                    rootInstance.$children[i].$data.selectedFatherOption = ''
                     rootInstance.$children[i].$data.isSelectorOpen = false
+                    rootInstance.$children[i].$data.isFatherLayerOpen = true
                     rootInstance.$children[i].$data.selectedOptions = [ ... this.$data.previousSavedOptions]
                 }
             }
@@ -300,12 +417,32 @@ export default Vue.extend({
         },
         filterItems: function(options:any) {
             const vm = this
-            return options.filter(function(option:any) {
-                let regex = new RegExp('(' + vm.$data.searchQuery + ')', 'i')
-                return option.label
-                    ?   option.label.match(regex)
-                    :   ''
-            })
+            if(options){
+                if(vm.$props.doubleLayerMode && vm.$props.groupMode){
+                    return options.filter(function(option:any) {
+                        let regex = new RegExp('(' + vm.$data.searchQuery + ')', 'i')
+                        return option.label
+                            ?   option.label.match(regex)
+                            :   ''
+                    })
+                }
+
+                if(vm.$props.doubleLayerMode && !vm.$props.groupMode){
+                    return options[vm.$data.selectedFatherOption].filter(function(option:any) {
+                        let regex = new RegExp('(' + vm.$data.searchQuery + ')', 'i')
+                        return option.label
+                            ?   option.label.match(regex)
+                            :   ''
+                    })
+                }
+
+                return options.filter(function(option:any) {
+                    let regex = new RegExp('(' + vm.$data.searchQuery + ')', 'i')
+                    return option.label
+                        ?   option.label.match(regex)
+                        :   ''
+                })
+            }
         },
         applyMethod(){
             this.$data.previousSavedOptions = this.$data.selectedOptions
@@ -313,11 +450,83 @@ export default Vue.extend({
             this.isSelectorOpen = false
         },
         selectAllMethod(){
-            this.clearSelectedOptionsMethod()
-            this.$data.selectedOptions.push(... this.$props.options)
+            if(this.$props.doubleLayerMode){
+                const otherFatherOptionItems = this.$data.selectedOptions.filter((item:any)=>{
+                    return item.fatherOptionLabel !== this.$data.selectedFatherOption
+                })
+
+                const rawData = [
+                    ... otherFatherOptionItems,
+                    ... this.$data.doubleLayerModeOptions[this.$data.selectedFatherOption]
+                ]
+
+                this.$data.selectedOptions = []
+                this.$data.selectedOptions.push(... rawData)
+            }else{
+                this.clearSelectedOptionsMethod()
+                this.$data.selectedOptions.push(... this.$props.options)
+            }
         },
         clearSelectedOptionsMethod(){
-            this.$data.selectedOptions = []
+            if(this.$props.doubleLayerMode){
+                const otherFatherOptionItems = this.$data.selectedOptions.filter((item:any)=>{
+                    return item.fatherOptionLabel !== this.$data.selectedFatherOption
+                })
+                
+                this.$data.selectedOptions = []
+                this.$data.selectedOptions.push(... otherFatherOptionItems)
+            }else{
+                this.$data.selectedOptions = []
+            }
+        },
+        goBackToFatherLayer(){
+            this.switchFatherLayer(true)
+            this.$data.searchQuery = ''
+        },
+        switchFatherLayer(status: boolean){
+            this.$data.isFatherLayerOpen = status
+        },
+        async emitUserSelectedFatherOption(option:any){
+            try{
+                this.$data.selectedFatherOption = option.label
+
+                if(!this.$data.doubleLayerModeOptions[option.label]){
+                    const response = await this.$props.childrenOptionFetchFunction(option.value, option.label)
+                    this.$data.doubleLayerModeOptions[option.label] = response
+                    this.generateNewDoubleLayerGroupModeOptions()
+                }
+                
+                this.switchFatherLayer(false)
+            }catch(err){
+                console.log(err)
+            }
+        },
+        generateNewDoubleLayerGroupModeOptions(){
+            const allOptions = Object.entries(this.$data.doubleLayerModeOptions)
+
+            const result = allOptions.map((target:any)=>{
+                const fatherLayerLabel = target[0]
+                const value = target[1].reduce((acc:any, item:any)=>{
+                    const group = ( acc[`${item.groupName ? item.groupName : 'Not Set'}`] || [] )
+                    group.push(item)
+                    acc[`${item.groupName ? item.groupName : 'Not Set'}`] = group	
+                    return acc
+                }, {
+                })
+                return {
+                    fatherLayerLabel,
+                    value
+                }
+            }).map((d:any)=>{
+                let newObject = {
+                    list: Object.keys(d.value),
+                    data: Object.values(d.value),
+                    type: d.fatherLayerLabel
+                }
+                return newObject
+            })
+
+            this.$data.doubleLayerGroupModeOptions = result
         }
     },
 })
@@ -364,11 +573,15 @@ $colors:(
         text-shadow: 0 0.04*$rootFontSize 0.04*$rootFontSize rgba(0,0,0,0.35);
         text-align:center;
         transition: all 0.2s;
-        &:hover{
+        &:hover:not([disabled]){
             border-color:#a7a6a6;
         }
         &:focus{
             outline: unset;
+        }
+        &:disabled{
+            opacity: 0.5;
+            filter: alpha(opacity=50)
         }
     }
 
@@ -518,6 +731,19 @@ $colors:(
         input{
             margin-right: 8px;
         }
+    }
+
+    .dropdown__linkBtn{
+        display: block;
+        margin: 6px;
+        padding: 6px 12px;
+        background-color: #ccc;
+        text-align: center;
+        border-radius: 5px;
+        color: #000;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
     }
 }
 </style>

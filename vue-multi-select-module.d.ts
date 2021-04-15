@@ -12,7 +12,11 @@ export namespace VueMultiSelectModule {
         searchQuery: string
         selectedOptions: Array<any>
         previousSavedOptions: Array<any>
+        doubleLayerModeOptions: any
+        doubleLayerGroupModeOptions: Array<any>
+        selectedFatherOption: string
         isSelectorOpen: boolean
+        isFatherLayerOpen: boolean
         defaultButtonOptions: buttonOptions
     }
 }
