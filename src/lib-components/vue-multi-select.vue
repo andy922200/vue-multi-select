@@ -97,24 +97,59 @@
                     </slot>
                     <!--Options Area-->
                     <div class="dropdown__optionsArea">
-                        <div 
-                            v-for="(option,index) in filterItems(options)"
-                            :key="`option${index}`"
-                            class="dropdown__optionWrapper"
-                        >
-                            <input 
-                                :id="`option${index}`" 
-                                v-model="selectedOptions" 
-                                type="checkbox" 
-                                :value="option"
-                                :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
-                                    (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
-                                "
+                        <template v-if="groupMode">
+                            <div 
+                                v-for="(group, groupIndex) in groupModeOptions.data" 
+                                :key="groupIndex" 
+                                class="dropdown__groupWrapper"
                             >
-                            <label :for="`option${index}`">
-                                {{ option.label }}
-                            </label>
-                        </div>
+                                <h6
+                                    v-if="filterItems(group).length > 0"
+                                    class="dropdown__groupTitle"
+                                >
+                                    {{ groupModeOptions.list[groupIndex] }}
+                                </h6>
+                                <div 
+                                    v-for="(option) in filterItems(group)"
+                                    :key="`option${option.label}`"
+                                    class="dropdown__optionWrapper"
+                                >
+                                    <input 
+                                        :id="`option${option.label}`" 
+                                        v-model="selectedOptions" 
+                                        type="checkbox" 
+                                        :value="option"
+                                        :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                            (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                        "
+                                    >
+                                    <label :for="`option${option.label}`">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <div 
+                                v-for="(option,index) in filterItems(options)"
+                                :key="`option${index}`"
+                                class="dropdown__optionWrapper"
+                            >
+                                <input 
+                                    :id="`option${index}`" 
+                                    v-model="selectedOptions" 
+                                    type="checkbox" 
+                                    :value="option"
+                                    :disabled="(single && selectedOptions.length >= 1 && selectedOptions.indexOf(option) === -1) || 
+                                        (selectedOptions.length >= limit && selectedOptions.indexOf(option) === -1)
+                                    "
+                                >
+                                <label :for="`option${index}`">
+                                    {{ option.label }}
+                                </label>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -169,6 +204,11 @@ export default Vue.extend({
             default(){
                 return []
             }
+        },
+        groupMode: {
+            type: Boolean,
+            default: false,
+            required: false
         }
     },
     data():VueMultiSelectModule.SelectorData{
@@ -194,6 +234,21 @@ export default Vue.extend({
                     name: 'Clear',
                     hide: false,
                 }
+            }
+        }
+    },
+    computed: {
+        groupModeOptions(){
+            const result = this.$props.options.reduce((acc:any, item:any)=>{
+                const group = ( acc[`${item.groupName ? item.groupName : 'Not Set'}`] || [] )
+                group.push(item)
+                acc[`${item.groupName ? item.groupName : 'Not Set'}`] = group	
+                return acc
+            }, {
+            })
+            return {
+                list: Object.keys(result),
+                data: Object.values(result)
             }
         }
     },
@@ -438,6 +493,13 @@ $colors:(
             100% { 
                 transform: rotate(360deg); 
             }
+        }
+    }
+
+    .dropdown__groupWrapper{
+        .dropdown__groupTitle{
+            margin: 0.5 * $rootFontSize 0;
+            font-size: 16px;
         }
     }
 
