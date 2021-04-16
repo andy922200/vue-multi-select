@@ -109,12 +109,14 @@
                     :class="!isFatherLayerOpen || !doubleLayerMode ? 'dropdown__searchField--doubleLayer' : ''"
                 >
                     <template v-if="doubleLayerMode && !isFatherLayerOpen">
-                        <button
-                            class="backToFatherLayerBtn btn btn__secondary dropdownBtn__format" 
-                            @click.stop="goBackToFatherLayer()"
-                        >
-                            <span class="chevron left" />
-                        </button>
+                        <div class="backToFatherLayerBtn__wrapper">
+                            <button
+                                class="backToFatherLayerBtn btn btn__secondary dropdownBtn__format" 
+                                @click.stop="goBackToFatherLayer()"
+                            >
+                                <span class="chevron left" />
+                            </button>
+                        </div>
                     </template>
                     <input
                         v-model="searchQuery"
@@ -662,11 +664,22 @@ $colors:(
         cursor:pointer;
     }
 
-    .backToFatherLayerBtn{
-        margin-right: 2px;
-        padding: 4px 16px 4px 14px;
-    }
+    .backToFatherLayerBtn__wrapper{
+        position:relative;
 
+        .backToFatherLayerBtn{
+            margin-right: 2px;
+            padding: 4px 16px 4px 14px;
+            height:30px;
+            span{
+                position: absolute;
+                top: 50%;
+                left: 44%;
+                transform: translate(-50%,-50%);
+            }
+        }
+    }
+    
     .dropdown__toggle{
         white-space: nowrap;
         &:after{
@@ -748,6 +761,7 @@ $colors:(
     .dropdown__searchField--doubleLayer{
         display: flex;
         flex-wrap: nowrap;
+        align-items: center;
     }
 
     .dropdown__spinnerOverlay{
