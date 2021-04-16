@@ -557,7 +557,7 @@ export default Vue.extend({
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 $rootFontSize: 13.3333333px;
 
 $typeList: (
