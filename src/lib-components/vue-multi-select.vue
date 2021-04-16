@@ -26,7 +26,7 @@
                         <button
                             v-if="defaultButtonOptions.close && !defaultButtonOptions.close.hide"
                             type="button"
-                            class="btn btn-secondary btn__secondary dropdownBtn__format"
+                            class="btn btn__secondary dropdownBtn__format"
                             @click.stop="closeMethod"
                         >
                             <span>{{ defaultButtonOptions.close.name }}</span>
@@ -39,7 +39,8 @@
                         <button
                             v-if="defaultButtonOptions.apply && !defaultButtonOptions.apply.hide"
                             type="button"
-                            class="btn btn-primary btn__primary dropdownBtn__format"
+                            class="btn btn__primary dropdownBtn__format"
+                            :disabled="isFetching || isChildrenOptionFetching"
                             @click.stop="applyMethod"
                         >
                             <span>{{ defaultButtonOptions.apply.name }}</span>
@@ -52,8 +53,8 @@
                         <button
                             v-if="defaultButtonOptions.selectAll && !defaultButtonOptions.selectAll.hide && !single && (limit === Infinity)"
                             type="button"
-                            class="btn btn-info btn__info dropdownBtn__format"
-                            :disabled="isFatherLayerOpen && doubleLayerMode"
+                            class="btn btn__info dropdownBtn__format"
+                            :disabled="(isFatherLayerOpen && doubleLayerMode) || (isFetching || isChildrenOptionFetching)"
                             @click.stop="selectAllMethod"
                         >
                             <span>{{ defaultButtonOptions.selectAll.name }}</span>
@@ -66,8 +67,8 @@
                         <button
                             v-if="defaultButtonOptions.clear && !defaultButtonOptions.clear.hide"
                             type="button"
-                            class="btn btn-danger btn__danger dropdownBtn__format"
-                            :disabled="isFatherLayerOpen && doubleLayerMode"
+                            class="btn btn__danger dropdownBtn__format"
+                            :disabled="(isFatherLayerOpen && doubleLayerMode) || (isFetching || isChildrenOptionFetching)"
                             @click.stop="clearSelectedOptionsMethod"
                         >
                             <span>{{ defaultButtonOptions.clear.name }}</span>
@@ -79,20 +80,42 @@
 
                 <!-- Double Layer Only-->
                 <template v-if="doubleLayerMode && isFatherLayerOpen">
-                    <a
-                        v-for="(fatherOption,index) in fatherOptions"
-                        :key="`${fatherOption.label},${index}`"
-                        class="dropdown__linkBtn"
-                        @click.stop.self="emitUserSelectedFatherOption(fatherOption)"
-                    >
-                        {{ fatherOption.label }}
-                    </a>
+                    <!--Spinner-->
+                    <slot name="spinner">
+                        <div
+                            v-if="isFetching || isChildrenOptionFetching"
+                            class="dropdown__spinnerOverlay"
+                        >
+                            <div class="cv-spinner">
+                                <span class="spinner" />
+                            </div>
+                        </div>
+                    </slot>
+                    <template v-if="!isChildrenOptionFetching">
+                        <a
+                            v-for="(fatherOption,index) in fatherOptions"
+                            :key="`${fatherOption.label},${index}`"
+                            class="dropdown__linkBtn"
+                            @click.stop.self="emitUserSelectedFatherOption(fatherOption)"
+                        >
+                            {{ fatherOption.label }}
+                        </a>
+                    </template>
                 </template>
 
                 <div
                     v-if="!isFatherLayerOpen || !doubleLayerMode"
                     class="dropdown__searchField"
+                    :class="!isFatherLayerOpen || !doubleLayerMode ? 'dropdown__searchField--doubleLayer' : ''"
                 >
+                    <template v-if="doubleLayerMode && !isFatherLayerOpen">
+                        <button
+                            class="backToFatherLayerBtn btn btn__secondary dropdownBtn__format" 
+                            @click.stop="goBackToFatherLayer()"
+                        >
+                            <span class="chevron left" />
+                        </button>
+                    </template>
                     <input
                         v-model="searchQuery"
                         type="text"
@@ -102,23 +125,9 @@
                 </div>
 
                 <div class="dropdown__filterOptionsWrapper">
-                    <!--Spinner-->
-                    <slot name="spinner">
-                        <div
-                            v-if="isFetching"
-                            class="dropdown__spinnerOverlay"
-                        >
-                            <div class="cv-spinner">
-                                <span class="spinner" />
-                            </div>
-                        </div>
-                    </slot>
                     <div class="dropdown__optionsArea">
                         <!--Double Layer Mode Options Area-->
                         <template v-if="doubleLayerMode && !isFatherLayerOpen">
-                            <button @click.stop.self="goBackToFatherLayer()">
-                                Back
-                            </button>
                             <template v-if="!groupMode && doubleLayerModeOptions.length !== 0">
                                 <div 
                                     v-for="(option,index) in filterItems(doubleLayerModeOptions)"
@@ -182,6 +191,17 @@
                         </template>
                         <!--Single Layer Mode Options Area-->
                         <template v-if="!doubleLayerMode">
+                            <!--Spinner-->
+                            <slot name="spinner">
+                                <div
+                                    v-if="isFetching"
+                                    class="dropdown__spinnerOverlay"
+                                >
+                                    <div class="cv-spinner">
+                                        <span class="spinner" />
+                                    </div>
+                                </div>
+                            </slot>
                             <div class="dropdown__optionsArea">
                                 <template v-if="groupMode">
                                     <div 
@@ -330,6 +350,7 @@ export default Vue.extend({
             selectedFatherOption: '',
             isSelectorOpen: false,
             isFatherLayerOpen: true,
+            isChildrenOptionFetching: false,
             defaultButtonOptions: {
                 close: {
                     name: 'Close',
@@ -491,9 +512,11 @@ export default Vue.extend({
                 this.$data.selectedFatherOption = option.label
 
                 if(!this.$data.doubleLayerModeOptions[option.label]){
+                    this.$data.isChildrenOptionFetching = true
                     const response = await this.$props.childrenOptionFetchFunction(option.value, option.label)
                     this.$data.doubleLayerModeOptions[option.label] = response
                     this.generateNewDoubleLayerGroupModeOptions()
+                    this.$data.isChildrenOptionFetching = false
                 }
                 
                 this.switchFatherLayer(false)
@@ -557,6 +580,36 @@ $colors:(
     dark:#343a40
 );
 
+.chevron{
+    &::before{
+        border-style: solid;
+        border-width: 0.25em 0.25em 0 0;
+        content: '';
+        display: inline-block;
+        height: 0.45em;
+        left: 0.15em;
+        position: relative;
+        top: 0.15em;
+        transform: rotate(-45deg);
+        vertical-align: top;
+        width: 0.45em;
+    }
+    &.right:before {
+        left: 0;
+        transform: rotate(45deg);
+    }
+
+    &.bottom:before {
+        top: 0;
+        transform: rotate(135deg);
+    }
+
+    &.left:before {
+        left: 0.25em;
+        transform: rotate(-135deg);
+    }
+}
+
 .dropdown__wrapper{
     position: relative;
     display: inline-block;
@@ -581,7 +634,8 @@ $colors:(
         }
         &:disabled{
             opacity: 0.5;
-            filter: alpha(opacity=50)
+            filter: alpha(opacity=50);
+            cursor: not-allowed;
         }
     }
 
@@ -605,6 +659,12 @@ $colors:(
 
     .dropdownBtn__format{
         margin:0.005 * $rootFontSize;
+        cursor:pointer;
+    }
+
+    .backToFatherLayerBtn{
+        margin-right: 2px;
+        padding: 4px 16px 4px 14px;
     }
 
     .dropdown__toggle{
@@ -683,6 +743,11 @@ $colors:(
                 outline:unset;
             }
         }
+    }
+
+    .dropdown__searchField--doubleLayer{
+        display: flex;
+        flex-wrap: nowrap;
     }
 
     .dropdown__spinnerOverlay{

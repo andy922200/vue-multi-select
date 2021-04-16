@@ -10,6 +10,7 @@ export default Vue.extend({
             },
             singleLayerData: [],
             isFetching: false,
+            isFatherFetching: false,
             tests: [
                 {
                     label: 'NodeJS',
@@ -26,7 +27,7 @@ export default Vue.extend({
             ]
         }
     },
-    async mounted(){
+    async created(){
         try{
             this.$data.isFetching = true
             
@@ -73,7 +74,7 @@ export default Vue.extend({
         <div style="display:flex; justify-content:center;width:100%;">
             <vue-multi-select 
                 selector-title="DoubleLayer"
-                :is-fetching="isFetching"
+                :is-fetching="isFatherFetching"
                 :button-options="{
                     close: { name: 'Close1', hide: false},
                     apply: { name: 'Apply1', hide: false},

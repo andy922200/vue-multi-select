@@ -17,6 +17,7 @@ export namespace VueMultiSelectModule {
         selectedFatherOption: string
         isSelectorOpen: boolean
         isFatherLayerOpen: boolean
+        isChildrenOptionFetching: boolean
         defaultButtonOptions: buttonOptions
     }
 }
