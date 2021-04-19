@@ -167,8 +167,6 @@ async fetchData(query='', fatherOptionLabel=''){
 
     <template #spinner>
         Your Spinner Component
-        <!-- v-if="isFetching" is for singleLayer-->
-        <!-- v-if="isFetching || isChildrenOptionFetching" is for doubleLayer-->
     </template>
 </<vue-multi-select>
 ```

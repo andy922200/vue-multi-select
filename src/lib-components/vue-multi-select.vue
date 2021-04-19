@@ -82,16 +82,16 @@
                 <!-- Double Layer Only-->
                 <template v-if="doubleLayerMode && isFatherLayerOpen">
                     <!--Spinner-->
-                    <slot name="spinner">
-                        <div
-                            v-if="isFetching || isChildrenOptionFetching"
-                            class="dropdown__spinnerOverlay"
-                        >
+                    <div
+                        v-if="isFetching || isChildrenOptionFetching"
+                        class="dropdown__spinnerOverlay"
+                    >
+                        <slot name="spinner">
                             <div class="cv-spinner">
                                 <span class="spinner" />
                             </div>
-                        </div>
-                    </slot>
+                        </slot>
+                    </div>
                     <template v-if="!isChildrenOptionFetching">
                         <a
                             v-for="(fatherOption,index) in fatherOptions"
@@ -195,16 +195,16 @@
                         <!--Single Layer Mode Options Area-->
                         <template v-if="!doubleLayerMode">
                             <!--Spinner-->
-                            <slot name="spinner">
-                                <div
-                                    v-if="isFetching"
-                                    class="dropdown__spinnerOverlay"
-                                >
+                            <div
+                                v-if="isFetching"
+                                class="dropdown__spinnerOverlay"
+                            >
+                                <slot name="spinner">
                                     <div class="cv-spinner">
                                         <span class="spinner" />
                                     </div>
-                                </div>
-                            </slot>
+                                </slot>
+                            </div>
                             <div class="dropdown__optionsArea">
                                 <template v-if="groupMode">
                                     <div 
