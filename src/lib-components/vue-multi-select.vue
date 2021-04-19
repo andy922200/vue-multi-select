@@ -527,9 +527,9 @@ export default Vue.extend({
             }
         },
         generateNewDoubleLayerGroupModeOptions(){
-            const allOptions = Object.entries(this.$data.doubleLayerModeOptions)
+            const allOptions = Object.entries(this.$data.doubleLayerModeOptions) as [string, VueMultiSelectModule.DoubleLayerGroupModeOption][]
 
-            const result = allOptions.map((target:any)=>{
+            const result = allOptions.map((target)=>{
                 const fatherLayerLabel = target[0]
                 const value = target[1].reduce((acc:any, item:any)=>{
                     const group = ( acc[`${item.groupName ? item.groupName : 'Not Set'}`] || [] )

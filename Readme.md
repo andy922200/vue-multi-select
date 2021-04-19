@@ -35,9 +35,10 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
 ```
 3. Use the component in *.vue 在 *.vue 中使用套件 
 ```html
+<!-- Single Layer Mode-->
 <template>
     <vue-multi-select 
-        selector-title="Test"
+        selector-title="SingleLayer"
         :is-fetching="isFetching"
         :button-options="{
             close: { name: 'Close1', hide: false},
@@ -50,17 +51,42 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
         @getSelectedOptions="method for receiving data"
     />
 </template>
+
+<!-- Double Layer Mode-->
+<template>
+    <vue-multi-select 
+        selector-title="DoubleLayer"
+        :is-fetching="isFatherFetching"
+        :button-options="{
+            close: { name: 'Close2', hide: false},
+            apply: { name: 'Apply2', hide: false},
+            selectAll: { name: 'SelectAll2', hide: false},
+            clear: { name: 'Clear2', hide: false},
+        }"
+        :double-layer-mode="true"
+        :group-mode="true"
+        :father-options="tests"
+        :children-option-fetch-function="fetchData"
+        place-holder-text="placeHolderText"
+        @getSelectedOptions="printValue"
+    />
+</template>
 ```
 ### Props 傳入參數
 | Name | Default Value | Type | Required | Describe |
 | ---- | ------- | --------- | -------- | -------- |
-| single | false | Boolean | false | single select |
-| limit | Infinity| Number | false | limit numbers of user-selected options |
+| buttonOptions | buttonOption[] | Object | false | 4 Buttons ( Close, Apply, SelectAll Clear) |
+| childrenOptionFetchFunction | {} | Function | false | Fetch ChildrenLayer Option |
+| doubleLayerMode | false | Boolean | false | Activate DoubleLayer Mode |
+| fatherOptions | [] | Array | false | FatherLayer Options |
+| groupMode | false | Boolean | false | Activate GroupMode (The object in each option should include 'groupName' )
 | isFetching | false | Boolean | false | built-in spinner |
-| selectorTitle| "" | String | true | Trigger Dropdown Button Text  |
-| placeHolderText | false | String | false | searchBar placeHolderText |
-| buttonOptions | buttonOption Default | Object | false | 4 Buttons ( Close, Apply, SelectAll Clear) |
+| limit | Infinity| Number | false | limit numbers of user-selected options |
 | options| [] | Array | false | Selector Options
+| placeHolderText | false | String | false | searchBar placeHolderText |
+| single | false | Boolean | false | single select |
+| selectorTitle| "" | String | true | Trigger Dropdown Button Text  |
+
 
 ```js
 // buttonOption Interface
@@ -84,13 +110,49 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
 | getSelectedOptions | customObject [] [Array] | get user-selected options |
 
 ```json
-// custom Object => The label key is essential for each object.
+// SingleLayer Option Object Demo
 {
     "key1":"value1",
     "key2":"value2",
     "key3":"value3",
-    "label": "label1",
-    "key4":"value4"
+    "label": "label1, This should be included.",
+    "groupName": "If you are using groupMode, this key-value pair should be included"
+}
+
+// DoubleLayer FatherOption Object Demo
+{
+    "label": "NodeJS",
+    "value": "nodejs"
+}
+
+// DoubleLayer ChildrenOption Object Demo
+{
+    "key1":"value1",
+    "key2":"value2",
+    "key3":"value3",
+    "label": "label1, This should be included.",
+    "fatherOptionLabel": "This value will be generated from 'DoubleLayer FatherOption Object label'",
+    "groupName": "If you are using groupMode, this key-value pair should be included"
+}
+```
+```javascript
+// childrenOptionFetchFunction Demo
+async fetchData(query='', fatherOptionLabel=''){
+    try{
+        const { data: rawData } = await axios.get(`/positions.json?search=${query}`)
+        const result = rawData.map((d:any)=>{
+            const newObject = {
+                ... d,
+                label: `${fatherOptionLabel} ${d.title}`,
+                fatherOptionLabel,
+                groupName: d.company ? d.company : 'N/A'
+            }
+            return newObject
+        })
+        return result
+    }catch(err){
+        console.log(err)
+    }
 }
 ```
 ### Customize your Button 客製化按鈕
@@ -100,6 +162,12 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
         <button @click="closeMethod">
             Close
         </button>
+    </template>
+
+    <template #spinner>
+        Your Spinner Component
+        <!-- v-if="isFetching" is for singleLayer-->
+        <!-- v-if="isFetching || isChildrenOptionFetching" is for doubleLayer-->
     </template>
 </<vue-multi-select>
 ```
@@ -111,6 +179,7 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
 | applyBtn |applyMethod|
 | selectAllBtn |selectAllMethod|
 | clearBtn |clearSelectedOptionsMethod|
+| spinner | None |
 
 ## Built With
 * [Node.js](https://nodejs.org/en/) - Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine.

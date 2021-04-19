@@ -1,11 +1,19 @@
 export namespace VueMultiSelectModule {
-    interface buttonOption{
+    interface ButtonOption{
         name: string,
         hide: boolean,
     }
 
-    interface buttonOptions{
-        [key: string]: buttonOption
+    interface ButtonOptions{
+        [key: string]: ButtonOption
+    }
+
+    export interface DoubleLayerGroupModeOption{
+        [key: string]: any
+        label: string
+        fatherOptionLabel: string
+        groupName: string
+        id: string | number
     }
 
     export interface SelectorData{
@@ -18,6 +26,6 @@ export namespace VueMultiSelectModule {
         isSelectorOpen: boolean
         isFatherLayerOpen: boolean
         isChildrenOptionFetching: boolean
-        defaultButtonOptions: buttonOptions
+        defaultButtonOptions: ButtonOptions
     }
 }

@@ -50,7 +50,6 @@ export default Vue.extend({
                         fatherOptionLabel,
                         groupName: d.company ? d.company : 'N/A'
                     }
-                    // id key must have
                     return newObject
                 })
                 return result
@@ -90,6 +89,7 @@ export default Vue.extend({
             <vue-multi-select
                 selector-title="SingleLayer"
                 :is-fetching="isFetching"
+                :group-mode="true"
                 :options="singleLayerData"
                 place-holder-text="placeHolderText2"
                 @getSelectedOptions="printValue"
