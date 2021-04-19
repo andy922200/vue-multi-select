@@ -81,6 +81,7 @@ A Vue-Multi-Select via Vue 2.0 & TypeScript
 | fatherOptions | [] | Array | false | FatherLayer Options |
 | groupMode | false | Boolean | false | Activate GroupMode (The object in each option should include 'groupName' )
 | isFetching | false | Boolean | false | built-in spinner |
+| isToggleButtonDisable | false | Boolean | false | toggle button status  |
 | limit | Infinity| Number | false | limit numbers of user-selected options |
 | options| [] | Array | false | Selector Options
 | placeHolderText | false | String | false | searchBar placeHolderText |

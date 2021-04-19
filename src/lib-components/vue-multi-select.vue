@@ -8,6 +8,7 @@
             <button
                 type="button"
                 class="btn btn-light btn__light dropdown__toggle"
+                :disabled="isToggleButtonDisable"
                 @click.stop.self="changeToggleStatus"
             >
                 {{ selectorTitle }}
@@ -287,6 +288,11 @@ export default Vue.extend({
             default: Infinity
         },
         isFetching: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        isToggleButtonDisable: {
             type: Boolean,
             required: false,
             default: false
